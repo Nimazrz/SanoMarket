@@ -1,3 +1,68 @@
 from django.db import models
+from account.models import CustomUser
 
 # Create your models here.
+
+
+class Product(models.Model):
+
+    class Category(models.TextChoices):
+        ELECTRONICS = "electronics", "کالای دیجیتال"
+        CLOTHING = "clothing", "پوشاک"
+        BOOKS = "books", "کتاب و لوازم تحریر"
+        HOME_APPLIANCES = "home_appliances", "لوازم خانگی"
+        BEAUTY = "beauty", "آرایشی و بهداشتی"
+        TOYS = "toys", "اسباب‌بازی و کودک"
+        SPORTS = "sports", "ورزشی و سفر"
+        FOOD = "food", "خواروبار"
+        AUTOMOTIVE = "automotive", "خودرو و موتور"
+        JEWELRY = "jewelry", "زیورآلات و اکسسوری"
+        FURNITURE = "furniture", "مبلمان و دکوراسیون"
+        MEDICAL = "medical", "تجهیزات پزشکی"
+        MUSIC = "music", "موسیقی و آلات موسیقی"
+        OTHERS = "others", "چیز های دیگر"
+    name = models.CharField(max_length=255)
+    category = models.CharField(
+        max_length=20,
+        choices=Category.choices,
+        default=Category.ELECTRONICS
+    )
+    price = models.CharField(max_length=15)
+    offer = models.CharField(max_length=100, null=True, blank=True)
+    offer_price = models.CharField(max_length=15, null=True, blank=True)
+    description = models.TextField(blank=True, null=True)
+
+
+class ProductInfo(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='info')
+    title = models.CharField(max_length=255)
+    text = models.CharField(max_length=255)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        db_table = 'product_info'
+        ordering = ['-created_at']
+        indexes = [models.Index(fields=['-created_at']), models.Index(fields=['-updated_at'])]
+
+
+class Comment(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='comments')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='comments')
+    title = models.CharField(max_length=255)
+    text = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        db_table = 'comments'
+        ordering = ['-created_at']
+        indexes = [models.Index(fields=['-created_at']), models.Index(fields=['-updated_at'])]
