@@ -1,11 +1,8 @@
 from django.db import models
 from account.models import CustomUser
 
-# Create your models here.
-
 
 class Product(models.Model):
-
     class Category(models.TextChoices):
         ELECTRONICS = "electronics", "کالای دیجیتال"
         CLOTHING = "clothing", "پوشاک"
@@ -21,15 +18,17 @@ class Product(models.Model):
         MEDICAL = "medical", "تجهیزات پزشکی"
         MUSIC = "music", "موسیقی و آلات موسیقی"
         OTHERS = "others", "چیز های دیگر"
+
     name = models.CharField(max_length=255)
     category = models.CharField(
         max_length=20,
         choices=Category.choices,
         default=Category.ELECTRONICS
     )
-    price = models.CharField(max_length=15)
-    offer = models.CharField(max_length=100, null=True, blank=True)
-    offer_price = models.CharField(max_length=15, null=True, blank=True)
+    price = models.PositiveIntegerField(default=0)
+    offer = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    offer_price = models.PositiveIntegerField(null=True, blank=True)
+    inventory = models.PositiveIntegerField(default=0, null=True, blank=True)
     description = models.TextField(blank=True, null=True)
 
 
@@ -47,7 +46,9 @@ class ProductInfo(models.Model):
     class Meta:
         db_table = 'product_info'
         ordering = ['-created_at']
-        indexes = [models.Index(fields=['-created_at']), models.Index(fields=['-updated_at'])]
+        indexes = [
+            models.Index(fields=['-created_at'])
+        ]
 
 
 class Comment(models.Model):
@@ -65,4 +66,25 @@ class Comment(models.Model):
     class Meta:
         db_table = 'comments'
         ordering = ['-created_at']
-        indexes = [models.Index(fields=['-created_at']), models.Index(fields=['-updated_at'])]
+        indexes = [
+            models.Index(fields=['-created_at'])
+        ]
+
+
+class Image(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
+    image_file = models.ImageField(upload_to=f'{product.name}/', max_length=500)
+    title = models.CharField(max_length=200, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at'])
+        ]
