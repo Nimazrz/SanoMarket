@@ -20,6 +20,7 @@ class Product(models.Model):
         OTHERS = "others", "چیز های دیگر"
 
     name = models.CharField(max_length=255)
+    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='products')
     category = models.CharField(
         max_length=20,
         choices=Category.choices,
@@ -31,11 +32,21 @@ class Product(models.Model):
     inventory = models.PositiveIntegerField(default=0, null=True, blank=True)
     description = models.TextField(blank=True, null=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'products'
+        ordering = ['created_at']
+
 
 class ProductInfo(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='info')
-    title = models.CharField(max_length=255)
-    text = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, null=True, blank=True)
+    text = models.CharField(max_length=255, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
