@@ -6,6 +6,7 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r'products', market_views.ProductsViewSet, basename='products')
+router.register(r'comments', market_views.CommentViewSet, basename='comments')
 
 app_name = 'market'
 
