@@ -15,13 +15,13 @@ class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = CustomUser
-    list_display = ['phone', 'first_name', 'last_name', 'is_staff', 'is_active', 'is_seller']
-    list_editable = ['is_staff', 'is_seller']
+    list_display = ['phone', 'first_name', 'last_name', 'is_staff', 'is_active', ]
+    list_editable = ['is_staff', ]
     fieldsets = (
         (None, {'fields': ('phone', 'password')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'email', 'national_code')}),
         ('Permissions', {'fields': (
-            'is_seller_verified', 'is_seller', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+             'is_seller', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
     )
 
     add_fieldsets = (

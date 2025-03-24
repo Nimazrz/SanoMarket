@@ -39,7 +39,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     is_seller = models.BooleanField(default=False)
     national_code = models.CharField(max_length=10, blank=True, null=True, unique=True)
-    is_seller_verified = models.BooleanField(default=False)
 
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)

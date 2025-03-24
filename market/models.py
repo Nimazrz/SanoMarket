@@ -84,7 +84,7 @@ class Comment(models.Model):
 
 class Image(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
-    image_file = models.ImageField(upload_to=f'{product.name}/', max_length=500)
+    image_file = models.ImageField(upload_to=f'{product.name}/', max_length=500, null=True, blank=True)
     title = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
 
