@@ -1,29 +1,48 @@
-from rest_framework import serializers
+from rest_framework import serializers, status
+from rest_framework.response import Response
+from market.models import Product
 from orders.models import Order, OrderItem
 from market.serializers import ProductSerializer
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    product = ProductSerializer(read_only=True)
-
     class Meta:
         model = OrderItem
-        fields = ['id', 'product', 'price', 'quantity']
+        fields = ['id', 'order', 'product', 'price', 'quantity', 'get_cost']
+        read_only_fields = ['get_cost', 'order']
+
+    def get_cost(self, obj):
+        return obj.get_cost()
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True, read_only=True)  # چون order مربوط به چندین item هست
-    total_cost = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2)  # اضافه کردن مجموع هزینه
+    items = OrderItemSerializer(many=True,)
+    total_cost = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         fields = [
-            'id', 'buyer', 'address', 'first_name', 'last_name',
-            'phone', 'postal_code', 'province', 'city',
+            'id', 'buyer', 'address', 'first_name', 'last_name', 'phone',
             'created', 'updated', 'paid', 'items', 'total_cost'
         ]
+        read_only_fields = ['created', 'updated', 'total_cost']
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['total_cost'] = instance.get_total_cost()
-        return representation
+    def get_total_cost(self, obj):
+        return obj.get_total_cost()
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items', [])
+        for item_data in items_data:
+            if 'price' in item_data and item_data['price']:
+                raise serializers.ValidationError({"error": "You should not enter price!"})
+        order = Order.objects.create(**validated_data)
+        order_items = []
+        for item_data in items_data:
+            try:
+                product = Product.objects.get(id=item_data['product'].id)
+            except Product.DoesNotExist:
+                raise serializers.ValidationError({"error": f"Product with id {item_data['product']} does not exist!"})
+            item_price = product.offer_price if product.offer else product.price
+            order_items.append(OrderItem(order=order, price=item_price, **item_data))
+        OrderItem.objects.bulk_create(order_items)
+        return order
