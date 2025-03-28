@@ -1,8 +1,6 @@
-from rest_framework import serializers, status
-from rest_framework.response import Response
+from rest_framework import serializers
 from market.models import Product
 from orders.models import Order, OrderItem
-from market.serializers import ProductSerializer
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -46,3 +44,14 @@ class OrderSerializer(serializers.ModelSerializer):
             order_items.append(OrderItem(order=order, price=item_price, **item_data))
         OrderItem.objects.bulk_create(order_items)
         return order
+
+    def destroy(self, instance):
+        request = self.context['request']
+        if request.user.is_authenticated:
+            if instance.buyer == request.user:
+                instance.delete()
+                return instance
+            else:
+                raise serializers.ValidationError({"error": "You are not authorized to delete this order."})
+        else:
+            raise serializers.ValidationError({"error": "You are not authorized to delete this order."})
