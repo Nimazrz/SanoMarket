@@ -24,6 +24,7 @@ urlpatterns = [
     path("api/market/", include("market.urls", namespace="market")),
     path("api/account/", include("account.urls", namespace="account")),
     path("api/orders/", include("orders.urls", namespace="orders")),
+    path("api/cart/", include("cart.urls", namespace="cart")),
     path('api-auth/', include('rest_framework.urls')),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
