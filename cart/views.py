@@ -1,13 +1,19 @@
+from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets, status
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from .cart import Cart
+from orders.models import Order, OrderItem
 from market.models import Product
 from .serializers import CartSerializer
+from django.db import transaction
+
 
 
 class CartViewSet(viewsets.ViewSet):
+    permission_classes = (AllowAny,)
     def list(self, request):
         cart = Cart(request)
         data = list(cart)
@@ -19,35 +25,24 @@ class CartViewSet(viewsets.ViewSet):
         }
         return Response(response_data, status=status.HTTP_200_OK)
 
-    def create(self, request):
+    @action(detail=False, methods=['POST'], url_path='create-order')
+    def create_order(self, request):
         cart = Cart(request)
-        serializer = CartSerializer(data=request.data)
-        if serializer.is_valid():
-            item = serializer.add_to_cart(cart)
-            return Response(item, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if len(cart) == 0:
+            return Response({"error": "Cart is empty"}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['POST'], url_path='decrease')
-    def decrease(self, request):
-        cart = Cart(request)
-        serializer = CartSerializer(data=request.data)
-        if serializer.is_valid():
-            item = serializer.decrease_quantity(cart)
-            return Response(item, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        with transaction.atomic():  # ✅ تراکنش برای جلوگیری از ذخیره ناقص داده‌ها
+            order = Order.objects.create(user=request.user, total_price=cart.get_total_price())
 
-    @action(detail=False, methods=['DELETE'], url_path='remove')
-    def remove(self, request):
-        cart = Cart(request)
-        serializer = CartSerializer(data=request.data)
-        if serializer.is_valid():
-            message = serializer.remove_from_cart(cart)
-            return Response(message, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            for item in cart:
+                product = Product.objects.get(id=item['product']['id'])
+                OrderItem.objects.create(
+                    order=order,
+                    product=product,
+                    quantity=item['quantity'],
+                    price=item['price']
+                )
 
-    @action(detail=False, methods=['DELETE'], url_path='clear')
-    def clear(self, request):
-        cart = Cart(request)
-        message = {"message": "Cart cleared"}
-        cart.clear()
-        return Response(message, status=status.HTTP_200_OK)
+            cart.clear()  # ✅ پاک کردن سبد خرید بعد از ثبت سفارش
+
+        return Response({"message": "Order created successfully", "order_id": order.id}, status=status.HTTP_201_CREATED)
