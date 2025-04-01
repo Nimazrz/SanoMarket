@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authentication',
     'rest_framework.authtoken',
-
+    'django_filters',
 
 ]
 
@@ -165,6 +165,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS':
     'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 8,
+
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+
 }
 
 # درگاه پرداخت

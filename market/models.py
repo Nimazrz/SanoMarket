@@ -24,7 +24,8 @@ class Product(models.Model):
     category = models.CharField(
         max_length=20,
         choices=Category.choices,
-        default=Category.ELECTRONICS
+        default=Category.ELECTRONICS,
+        db_index=True
     )
     price = models.PositiveIntegerField(default=0)
     offer = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
