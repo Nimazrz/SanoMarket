@@ -7,9 +7,6 @@ class SimpleMiddleware:
         # One-time configuration and initialization.
 
     def __call__(self, request):
-        print(request.user)
-        print(not request.user.is_active)
-        print(request.user.is_authenticated)
 
         response = self.get_response(request)
 

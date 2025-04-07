@@ -7,7 +7,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 
 
-class ProductListView(generics.ListAPIView):
+class ProductListView(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
@@ -16,7 +16,6 @@ class ProductListView(generics.ListAPIView):
     search_fields = ['name', 'description']
     ordering_fields = '__all__'
 
-# class Product
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
