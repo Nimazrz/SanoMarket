@@ -43,7 +43,8 @@ class ProductSerializer(serializers.ModelSerializer):
             if request.user.is_seller:
                 info_data = validated_data.pop('info', [])
                 image_data = validated_data.pop('images', [])
-                product = Product.objects.create(owner=request.user, **validated_data)
+                validated_data['owner'] = request.user
+                product = Product.objects.create(**validated_data)
                 if info_data:
                     for info in info_data:
                         ProductInfo.objects.create(product=product, **info)
