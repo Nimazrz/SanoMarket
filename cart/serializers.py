@@ -5,9 +5,6 @@ from django.shortcuts import get_object_or_404
 
 class CartSerializer(serializers.Serializer):
     product_id = serializers.IntegerField()
-    quantity = serializers.IntegerField(read_only=True)
-    price = serializers.IntegerField(read_only=True)
-    total = serializers.IntegerField(read_only=True)
 
     def add_to_cart(self, cart):
         product_id = self.validated_data['product_id']

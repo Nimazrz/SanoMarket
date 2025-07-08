@@ -1,10 +1,7 @@
-from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets, status
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import  IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from django.shortcuts import get_object_or_404
-
 from account.models import Address
 from .cart import Cart
 from orders.models import Order, OrderItem
@@ -14,7 +11,6 @@ from django.db import transaction
 
 
 class CartViewSet(viewsets.ViewSet):
-    permission_classes = (AllowAny,)
 
     def list(self, request):
         cart = Cart(request)
@@ -27,7 +23,28 @@ class CartViewSet(viewsets.ViewSet):
         }
         return Response(response_data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['post'], url_path='remove', permission_classes=[IsAuthenticated])
+    def remove_from_cart(self, request):
+        serializer = CartSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        cart = Cart(request)
+        response = serializer.remove_from_cart(cart)
+
+        return Response(response, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['post'], url_path='add', permission_classes=[IsAuthenticated])
+    def add_to_cart(self, request):
+        serializer = CartSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        cart = Cart(request)
+        item = serializer.add_to_cart(cart)
+
+        return Response(item, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=['POST'], url_path='create-order', permission_classes=[IsAuthenticated])
+    @transaction.atomic
     def create_order(self, request):
         """
         data for resaver
