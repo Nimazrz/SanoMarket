@@ -23,8 +23,8 @@ class CartViewSet(viewsets.ViewSet):
         }
         return Response(response_data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['post'], url_path='remove', permission_classes=[IsAuthenticated])
-    def remove_from_cart(self, request):
+    @action(detail=False, methods=['post'], url_path='decrease;', permission_classes=[IsAuthenticated])
+    def decrease_item(self, request):
         serializer = CartSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -98,3 +98,13 @@ class CartViewSet(viewsets.ViewSet):
         cart.clear()
 
         return Response({"message": "Order created successfully", "order_id": order.id}, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=['post'], url_path='remove-item', permission_classes=[IsAuthenticated])
+    def remove_item(self, request):
+        serializer = CartSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        cart = Cart(request)
+        response = serializer.remove_from_cart(cart)
+
+        return Response(response, status=status.HTTP_200_OK)
