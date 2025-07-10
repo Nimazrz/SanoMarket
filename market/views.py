@@ -6,7 +6,7 @@ from .serializers import ProductSerializer, CommentSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from .permissions import *
-
+from rest_framework import generics
 
 class ProductListView(viewsets.ModelViewSet):
     queryset = Product.objects.all()
