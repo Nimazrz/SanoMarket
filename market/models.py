@@ -93,7 +93,7 @@ class Image(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.title
+        return self.title if self.title else self.image_file
 
     class Meta:
         ordering = ['-created_at']

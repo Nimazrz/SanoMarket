@@ -12,10 +12,16 @@ class ProductInfoSerializer(serializers.ModelSerializer):
 
 
 class ImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Image
-        fields = ['product', 'image_file', 'title', 'description']
+        fields = ['product', 'image_url', 'title', 'description']
         read_only_fields = ['product']
+
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        return request.build_absolute_uri(obj.image_file.url) if obj.image_file else None
 
 
 class CommentSerializer(serializers.ModelSerializer):
