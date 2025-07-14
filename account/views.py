@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from .serializers import *
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 import redis
 from rest_framework_simplejwt.tokens import RefreshToken
 import secrets
@@ -16,6 +16,14 @@ def send_sms(phone):
         print(f"Sending code {code} to phone {phone}")
         return code
     return False
+
+
+class CurrentUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class SignupAPIView(APIView):

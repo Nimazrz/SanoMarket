@@ -14,7 +14,7 @@ class ProductInfoInline(admin.StackedInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'category', 'price', 'offer', 'offer_price', 'inventory')
+    list_display = ('id', 'name', 'category', 'price', 'offer', 'offer_price', 'inventory', 'sold_count')
     inlines = [ProductInfoInline, ImageInline]
 
 

@@ -35,11 +35,12 @@ class ProductSerializer(serializers.ModelSerializer):
     info = ProductInfoSerializer(many=True)
     images = ImageSerializer(many=True)
     comments = CommentSerializer(many=True, read_only=True)
+    average_rating = serializers.FloatField(read_only=True)
 
     class Meta:
         model = Product
         fields = ['id', 'name', 'owner', 'category', 'price', 'offer', 'offer_price', 'description', 'inventory',
-                  'info', 'images', 'comments']
+                  'info', 'images', 'average_rating', 'comments']
         read_only_fields = ['owner', 'comments']
         update_fields = ['info', 'images', 'comments']
 
@@ -94,3 +95,18 @@ class ProductSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({"error": "You are not seller!"})
             raise serializers.ValidationError({"error": "You are not owner of this product!"})
         raise serializers.ValidationError({'error': 'You are not Authenticated!'})
+
+
+class RelatedProductSerializer(serializers.ModelSerializer):
+    images = ImageSerializer(many=True)
+
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'category', 'price', 'offer', 'offer_price', 'images',]
+        read_only_fields = fields
+
+
+class ProductRatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductRating
+        fields = ['product', 'stars']

@@ -1,5 +1,7 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from account.models import CustomUser
+from django.db.models import Avg
 
 
 class Product(models.Model):
@@ -33,8 +35,18 @@ class Product(models.Model):
     inventory = models.PositiveIntegerField(default=0, null=True, blank=True)
     description = models.TextField(blank=True, null=True)
 
+    sold_count = models.PositiveIntegerField(default=0, null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # @property
+    # def ordering_price(self):
+    #     return self.offer_price if self.offer_price else self.price
+    #
+    # @property
+    # def average_rating(self):
+    #     return self.ratings.aggregate(Avg('stars'))['stars__avg'] or 0
 
     def __str__(self):
         return self.name
@@ -42,6 +54,7 @@ class Product(models.Model):
     class Meta:
         db_table = 'products'
         ordering = ['created_at']
+        unique_together = (('name', 'owner'),)
 
 
 class ProductInfo(models.Model):
@@ -61,6 +74,18 @@ class ProductInfo(models.Model):
         indexes = [
             models.Index(fields=['-created_at'])
         ]
+
+
+class ProductRating(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='ratings')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='ratings')
+    stars = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('product', 'user')
+
+
 
 
 class Comment(models.Model):
