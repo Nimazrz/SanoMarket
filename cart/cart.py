@@ -13,21 +13,29 @@ class Cart:
         product_id = str(product.id)
         product_price = product.offer_price if product.offer_price else product.price
 
-        if product_id not in self.cart:
-            self.cart[product_id] = {'quantity': 1, 'price': product_price}
-        else:
+        if product.inventory <= 0:
+            pass
+        if product_id in self.cart:
             if self.cart[product_id]['quantity'] < product.inventory:
                 self.cart[product_id]['quantity'] += 1
+        else:
+            self.cart[product_id] = {'quantity': 1}
 
-        self.cart[product_id]['price'] = product_price  # Always update price
+        self.cart[product_id]['price'] = product_price
         self.save()
 
     def decrease(self, product):
         product_id = str(product.id)
+        if product_id not in self.cart:
+            raise KeyError(f"Product {product_id} not in cart")
+
         if self.cart[product_id]['quantity'] > 1:
             self.cart[product_id]['quantity'] -= 1
-        self.save()
+        else:
+            # اگر تعداد ۱ بود، حذفش کن
+            del self.cart[product_id]
 
+        self.save()
     def remove(self, product):
         product_id = str(product.id)
         if product_id in self.cart:
@@ -51,12 +59,15 @@ class Cart:
         cart_dict = self.cart.copy()
 
         for product in products:
+            images = product.images.all()
+            image_url = images[0].image_file.url if images else '/images/no-image.jpg'
+
             cart_dict[str(product.id)]['product'] = {
                 "id": product.id,
                 "name": product.name,
                 "price": product.offer_price if product.offer_price else product.price,
-                "image_url": product.image.url if product.images.all() else None
-            }  # ✅ Convert product to a dictionary
+                "image_url": image_url
+            }
 
         for item in cart_dict.values():
             item['total'] = (item['price'] or 0) * item['quantity']

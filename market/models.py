@@ -32,10 +32,10 @@ class Product(models.Model):
     price = models.PositiveIntegerField(default=0)
     offer = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     offer_price = models.PositiveIntegerField(null=True, blank=True)
-    inventory = models.PositiveIntegerField(default=0, null=True, blank=True)
+    inventory = models.PositiveIntegerField(default=0)
     description = models.TextField(blank=True, null=True)
 
-    sold_count = models.PositiveIntegerField(default=0, null=True, blank=True)
+    sold_count = models.PositiveIntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -86,8 +86,6 @@ class ProductRating(models.Model):
         unique_together = ('product', 'user')
 
 
-
-
 class Comment(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='comments')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='comments')
@@ -110,7 +108,7 @@ class Comment(models.Model):
 
 class Image(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
-    image_file = models.ImageField(upload_to=f'{product.name}/', max_length=500, null=True, blank=True)
+    image_file = models.ImageField(upload_to=f'{product.name}/', max_length=500)
     title = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
 
@@ -118,7 +116,7 @@ class Image(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.title if self.title else self.image_file
+        return self.title if self.title else str(self.image_file)
 
     class Meta:
         ordering = ['-created_at']

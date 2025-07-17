@@ -4,6 +4,8 @@ from . import views
 
 router = DefaultRouter()
 router.register('cart', views.CartViewSet, basename='cart')
+# router.register('cartauthenticateduser', views.CartAuthenticatedUserViewSet, basename='cartauthenticateduser')
+
 
 app_name = 'cart'
 urlpatterns = [
