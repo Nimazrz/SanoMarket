@@ -4,6 +4,13 @@ from account.models import CustomUser, Address
 
 
 class Order(models.Model):
+    class Status(models.TextChoices):
+        AWAITING_PAYMENT = 'awaiting_payment', 'در انتظار پرداخت'
+        PAID = 'paid', 'پرداخت شده'
+        SHIPPING = 'shipping', 'در حال ارسال'
+        DELIVERED = 'delivered', 'تحویل داده شده'
+        CANCELLED = 'cancelled', 'لغو شده'
+        RETURNED = 'returned', 'مرجوع شده'
     buyer = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='orders', null=True)
     address = models.ForeignKey(Address, on_delete=models.SET_NULL, related_name='orders', null=True)
     first_name = models.CharField(max_length=50)
@@ -11,7 +18,7 @@ class Order(models.Model):
     phone = models.CharField(max_length=11)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    paid = models.BooleanField(default=False)
+    status = models.TextField(choices=Status.choices, default=Status.AWAITING_PAYMENT)
     total_price = models.PositiveIntegerField(default=0)
 
     class Meta:

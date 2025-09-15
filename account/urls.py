@@ -1,10 +1,10 @@
-from django.urls import path
-from rest_framework.authtoken.views import obtain_auth_token
+from django.urls import path, include
 from .views import *
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register(r"address", AddressViewset, basename='address')
+
 
 app_name = 'account'
 urlpatterns = [
@@ -13,4 +13,8 @@ urlpatterns = [
     path('verify_code/', VerifyCodeView.as_view(), name='verify_code'),
     path('signup/', SignupAPIView.as_view(), name='signup'),
     path('logout/', LogoutAPIView.as_view(), name='logout'),
+    # path('address/', AddressView.as_view(), name='address'),
+    path('profile/', ProfileView.as_view(), name='profile'),
+
+    path("", include(router.urls)),
     ]

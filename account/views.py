@@ -1,7 +1,7 @@
 from django.contrib.auth import logout
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework import status, viewsets, generics
 from .serializers import *
 from rest_framework.permissions import AllowAny, IsAuthenticated
 import redis
@@ -116,3 +116,27 @@ class VerifyCodeView(APIView):
             else:
                 return Response({"message": "Wrong code"}, status=400)
         return Response(serializer.errors, status=400)
+
+
+# class AddressView(generics.ListCreateAPIView):
+#     serializer_class = AddressSerializer
+#
+#     def get_queryset(self):
+#         return Address.objects.filter(custom_user=self.request.user)
+#
+#     def perform_create(self, serializer):
+#         serializer.save()
+
+class AddressViewset(viewsets.ModelViewSet):
+    serializer_class = AddressSerializer
+
+    def get_queryset(self):
+        return Address.objects.filter(custom_user=self.request.user)
+
+
+class ProfileView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProfileSerializer
+
+    def get_object(self):
+        return self.request.user

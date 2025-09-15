@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser
+from .models import CustomUser, Address
 from django.contrib.auth.hashers import make_password
 
 
@@ -48,3 +48,25 @@ class VerifyCodeSerializer(serializers.Serializer):
             raise serializers.ValidationError({"phone": "phone field is not valid"})
         return value
 
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = ['id', 'province', 'city', 'postal_code', 'address', 'custom_user']
+        read_only_fields = ['custom_user']
+
+    def create(self, validated_data):
+        try:
+            request = self.context.get('request')
+            address = Address.objects.create(custom_user=request.user, **validated_data)
+            return address
+        except Exception as e:
+            raise serializers.ValidationError({"error": str(e)})
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    addresses = AddressSerializer(many=True,)
+
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'phone', 'first_name', 'last_name', 'email', 'national_code', 'addresses']

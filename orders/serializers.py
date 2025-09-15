@@ -1,6 +1,13 @@
 from rest_framework import serializers
 from market.models import Product
+from account.models import Address
 from orders.models import Order, OrderItem
+
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = ['province', 'city', 'postal_code', 'address']
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -15,18 +22,21 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True,)
-    total_cost = serializers.SerializerMethodField()
+    address = AddressSerializer()
+    total_price = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         fields = [
             'id', 'buyer', 'address', 'first_name', 'last_name', 'phone',
-            'created', 'updated', 'paid', 'items', 'total_cost'
+            'created', 'updated', 'status', 'items', 'total_price'
         ]
-        read_only_fields = ['created', 'updated', 'total_cost']
+        read_only_fields = ['created', 'updated', 'total_price']
 
-    def get_total_cost(self, obj):
-        return obj.get_total_cost()
+    def get_total_price(self, obj):
+        if isinstance(obj, dict):
+            return obj.get("total_price")
+        return obj.total_price
 
     def create(self, validated_data):
         items_data = validated_data.pop('items', [])

@@ -40,14 +40,6 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # @property
-    # def ordering_price(self):
-    #     return self.offer_price if self.offer_price else self.price
-    #
-    # @property
-    # def average_rating(self):
-    #     return self.ratings.aggregate(Avg('stars'))['stars__avg'] or 0
-
     def __str__(self):
         return self.name
 

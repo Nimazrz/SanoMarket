@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, serializers
 from orders.serializers import OrderSerializer
 import json
 import requests
@@ -19,6 +19,19 @@ class OrderViewSet(viewsets.ModelViewSet):
         if user.is_authenticated:
             return Order.objects.filter(buyer=user)
         return Order.objects.none()
+
+    def update(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            raise serializers.ValidationError("کاربر احراز هویت نشده است.")
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        status = serializer.validated_data['status']
+        if status == 'awaiting_payment':
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            raise serializers.ValidationError("مبلغ سفارش پرداخت شده و قابل تغییر نیست.")
 
 
 if settings.SANDBOX:
