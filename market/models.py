@@ -1,3 +1,4 @@
+from time import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from account.models import CustomUser
@@ -37,8 +38,25 @@ class Product(models.Model):
 
     sold_count = models.PositiveIntegerField(default=0)
 
+    offer_start = models.DateTimeField(null=True, blank=True)
+    offer_end = models.DateTimeField(null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def is_offer_active(self):
+        now = timezone.now()
+        return (
+            self.offer
+            and self.offer_start
+            and self.offer_end
+            and self.offer_start <= now <= self.offer_end
+        )
+
+    def current_price(self):
+        if self.is_offer_active() and self.offer_price:
+            return self.offer_price
+        return self.price
 
     def __str__(self):
         return self.name
@@ -115,3 +133,27 @@ class Image(models.Model):
         indexes = [
             models.Index(fields=['-created_at'])
         ]
+
+
+class AmazingOffers(models.Model):
+    product = models.OneToOneField(Product, on_delete=models.CASCADE, related_name="amazing_offer")
+    discount_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def is_active(self):
+        now = timezone.now()
+        return self.start_time <= now <= self.end_time
+
+    def __str__(self):
+        return self.product.name
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at'])
+        ]
+

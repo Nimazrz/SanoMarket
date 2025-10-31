@@ -21,3 +21,4 @@ def update_offer_price(sender, instance, **kwargs):
 
     except Exception as e:
         print(f"Error in update_offer_price signal: {e}")
+

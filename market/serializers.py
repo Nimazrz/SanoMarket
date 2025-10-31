@@ -110,3 +110,12 @@ class ProductRatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductRating
         fields = ['product', 'stars']
+
+
+class AmazingProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+
+
+
+
